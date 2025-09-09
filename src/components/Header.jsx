@@ -1,13 +1,21 @@
 // src/components/Header.jsx
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 const Header = () => {
   const [activeSection, setActiveSection] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false); // 👈 state for mobile menu
   const location = useLocation();
 
+  const navItems = [
+    { id: "about", label: "About" },
+    { id: "toolbox", label: "Skills" },
+    { id: "work", label: "Work" },
+    { id: "experience", label: "Experience" },
+    { id: "contact", label: "Contact" },
+  ];
+
   useEffect(() => {
-    // Only observe sections on the home route
     if (location.pathname !== '/') return;
 
     const sections = Array.from(document.querySelectorAll('section[id]'));
@@ -37,11 +45,7 @@ const Header = () => {
         });
         if (closest) setActiveSection(closest.id);
       },
-      {
-        root: null,
-        rootMargin: '-30% 0px -30% 0px',
-        threshold: [0, 0.01, 0.25, 0.5, 0.75, 1],
-      }
+      { rootMargin: "-30% 0px -30% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
     );
 
     sections.forEach(s => observer.observe(s));
@@ -51,30 +55,50 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
+        {/* Logo */}
         <div className="logo">
-          <a href="#about">
+          <a href="/">
             <h1>Suhani Mathur</h1>
           </a>
         </div>
-        <nav className="nav-menu">
-  <ul className="nav-links">
-    <li><a href="/#about" className={location.pathname === '/' && activeSection === 'about' ? 'active' : ''}>About</a></li>
-    <li><a href="/#toolbox" className={location.pathname === '/' && activeSection === 'toolbox' ? 'active' : ''}>Skills</a></li>
-    <li><a href="/#work" className={location.pathname === '/' && activeSection === 'work' ? 'active' : ''}>Work</a></li>
-    <li><a href="/#experience" className={location.pathname === '/' && activeSection === 'experience' ? 'active' : ''}>Experience</a></li>
-    <li><a href="/#contact" className={location.pathname === '/' && activeSection === 'contact' ? 'active' : ''}>Contact</a></li>
-  </ul>
 
-  <div className="resume-btn">
-    <a
-      href="/resume"
-      className={`btn btn-secondary ${location.pathname === "/resume" ? "active" : ""}`}
-    >
-      Resume
-    </a>
-  </div>
-</nav>
+        {/* Hamburger button */}
+        <button 
+          className={`hamburger ${menuOpen ? "open" : ""}`} 
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
 
+        {/* Nav Menu */}
+        <nav className={`nav-menu ${menuOpen ? "show" : ""}`}>
+          <ul className="nav-links">
+            {navItems.map(({ id, label }) => (
+              <li key={id}>
+                <a
+                  href={location.pathname === "/" ? `#${id}` : `/#${id}`}
+                  className={location.pathname === "/" && activeSection === id ? "active" : ""}
+                  onClick={() => setMenuOpen(false)} // 👈 close menu on click
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* Resume Button */}
+          <div className="resume-btn">
+            <Link
+              to="/resume"
+              className={`btn btn-secondary ${location.pathname === "/resume" ? "active" : ""}`}
+              onClick={() => setMenuOpen(false)}
+            >
+              Resume
+            </Link>
+          </div>
+        </nav>
       </div>
     </header>
   );

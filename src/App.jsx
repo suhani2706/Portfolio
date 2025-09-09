@@ -9,12 +9,14 @@ import Projects from './components/Projects';
 import WorkExperience from './components/WorkExperience';
 import Resume from './components/MyResume';
 import Footer from './components/Footer';
+import ScrollToHash from './components/ScrollToHash'; 
 
 function App() {
   return (
     <div className="App">
       <Header />
       <main>
+      <ScrollToHash /> 
         <Routes>
           <Route
             path="/"
