@@ -1,5 +1,4 @@
 import React from "react";
-import resumePDF from "../assets/resume.pdf"; // make sure file exists here
 
 const Resume = () => {
   return (
@@ -9,14 +8,19 @@ const Resume = () => {
         <p className="section-subtitle">Get to know my journey</p>
 
         <div className="resume-buttons">
-          {/* open in new tab */}                    
-          <a href={resumePDF} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+          {/* open in new tab */}
+          <a
+            href="/resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary"
+          >
             View Resume
           </a>
 
           {/* force download */}
           <a
-            href={resumePDF}
+            href="/resume.pdf"
             download="Suhani_Mathur_Resume.pdf"
             className="btn btn-secondary"
           >
@@ -27,7 +31,7 @@ const Resume = () => {
         {/* embedded preview */}
         <div className="resume-preview">
           <iframe
-            src={resumePDF}
+            src="/resume.pdf"
             title="Suhani Mathur Resume"
             className="resume-iframe"
           ></iframe>

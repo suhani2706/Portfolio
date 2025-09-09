@@ -7,7 +7,7 @@ import About from './components/About';
 import Toolbox from './components/Toolbox';
 import Projects from './components/Projects';
 import WorkExperience from './components/WorkExperience';
-import Resume from './components/Resume';
+import Resume from './components/MyResume';
 import Footer from './components/Footer';
 
 function App() {
