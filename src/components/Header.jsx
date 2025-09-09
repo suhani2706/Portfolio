@@ -51,21 +51,30 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
-      <div className="logo">
-    <a href="#about">
-      <h1>Suhani Mathur</h1>
+        <div className="logo">
+          <a href="#about">
+            <h1>Suhani Mathur</h1>
+          </a>
+        </div>
+        <nav className="nav-menu">
+  <ul className="nav-links">
+    <li><a href="/#about" className={location.pathname === '/' && activeSection === 'about' ? 'active' : ''}>About</a></li>
+    <li><a href="/#toolbox" className={location.pathname === '/' && activeSection === 'toolbox' ? 'active' : ''}>Skills</a></li>
+    <li><a href="/#work" className={location.pathname === '/' && activeSection === 'work' ? 'active' : ''}>Work</a></li>
+    <li><a href="/#experience" className={location.pathname === '/' && activeSection === 'experience' ? 'active' : ''}>Experience</a></li>
+    <li><a href="/#contact" className={location.pathname === '/' && activeSection === 'contact' ? 'active' : ''}>Contact</a></li>
+  </ul>
+
+  <div className="resume-btn">
+    <a
+      href="/resume"
+      className={`btn btn-secondary ${location.pathname === "/resume" ? "active" : ""}`}
+    >
+      Resume
     </a>
   </div>
-        <nav className="nav-menu">
-          <ul>
-            <li><a href="/#about" className={location.pathname === '/' && activeSection === 'about' ? 'active' : ''}>About</a></li>
-            <li><a href="/#toolbox" className={location.pathname === '/' && activeSection === 'toolbox' ? 'active' : ''}>Skills</a></li>
-            <li><a href="/#work" className={location.pathname === '/' && activeSection === 'work' ? 'active' : ''}>Work</a></li>
-            <li><a href="/#experience" className={location.pathname === '/' && activeSection === 'experience' ? 'active' : ''}>Experience</a></li>
-            <li><a href="/#contact" className={location.pathname === '/' && activeSection === 'contact' ? 'active' : ''}>Contact</a></li>
-            <li><a href="/resume" className={location.pathname === '/resume' ? 'active' : ''}>Resume</a></li>
-          </ul>
-        </nav>
+</nav>
+
       </div>
     </header>
   );
