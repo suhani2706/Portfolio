@@ -18,7 +18,7 @@ const Projects = () => {
     {
       id: 2,
       title: "Doc-Tech",
-      role: "Full Stack Developer",
+      role: "Website Designer",
       description: "AI-driven patient-doctor platform with speech-to-text, real-time consultation, and automated reports.",
       logo: doctech,
       logoColor: "#2563EB",
