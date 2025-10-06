@@ -51,6 +51,7 @@ const Projects = () => {
     logoColor: "#1E3A8A",
     link: "https://www.figma.com/proto/3JVhVyjB77Rbdjt5sj6Oih?node-id=0-1&t=jwGyh2egiM2pvEH3-6"
     }
+    
   ];
 
   return (

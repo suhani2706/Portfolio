@@ -4,7 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 
 const Header = () => {
   const [activeSection, setActiveSection] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false); // 👈 state for mobile menu
+  const [menuOpen, setMenuOpen] = useState(false); // state for mobile menu
   const location = useLocation();
 
   const navItems = [
@@ -54,53 +54,52 @@ const Header = () => {
 
   return (
     <header className="header">
-      <div className="header-container">
-        {/* Logo */}
-        <div className="logo">
-          <a href="/">
-            <h1>Suhani Mathur</h1>
-          </a>
-        </div>
+  <div className="header-container">
+    {/* Logo Left */}
+    <div className="logo">
+      <a href="/">
+        <h1>Suhani Mathur</h1>
+      </a>
+    </div>
 
-        {/* Hamburger button */}
-        <button 
-          className={`hamburger ${menuOpen ? "open" : ""}`} 
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+    {/* Hamburger Right */}
+    <button
+      className={`hamburger ${menuOpen ? "open" : ""}`}
+      onClick={() => setMenuOpen(!menuOpen)}
+      aria-label="Toggle navigation menu"
+    >
+      <span></span><span></span><span></span>
+    </button>
 
-        {/* Nav Menu */}
-        <nav className={`nav-menu ${menuOpen ? "show" : ""}`}>
-          <ul className="nav-links">
-            {navItems.map(({ id, label }) => (
-              <li key={id}>
-                <a
-                  href={location.pathname === "/" ? `#${id}` : `/#${id}`}
-                  className={location.pathname === "/" && activeSection === id ? "active" : ""}
-                  onClick={() => setMenuOpen(false)} // 👈 close menu on click
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          {/* Resume Button */}
-          <div className="resume-btn">
-            <Link
-              to="/resume"
-              className={`btn btn-secondary ${location.pathname === "/resume" ? "active" : ""}`}
+    {/* Nav Menu */}
+    <nav className={`nav-menu ${menuOpen ? "show" : ""}`}>
+      <ul className="nav-links">
+        {navItems.map(({ id, label }) => (
+          <li key={id}>
+            <a
+              href={location.pathname === "/" ? `#${id}` : `/#${id}`}
+              className={location.pathname === "/" && activeSection === id ? "active" : ""}
               onClick={() => setMenuOpen(false)}
             >
-              Resume
-            </Link>
-          </div>
-        </nav>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div className="resume-btn">
+        <Link
+          to="/resume"
+          className={`btn btn-secondary ${location.pathname === "/resume" ? "active" : ""}`}
+          onClick={() => setMenuOpen(false)}
+        >
+          Resume
+        </Link>
       </div>
-    </header>
+    </nav>
+  </div>
+</header>
+
   );
 };
 

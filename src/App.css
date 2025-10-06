@@ -41,7 +41,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Buttons */
-/* Buttons */
 .btn {
   padding: 12px 24px;
   border: none;
@@ -90,7 +89,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .header-container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
@@ -714,8 +713,8 @@ h1, h2, h3, h4, h5, h6 {
 
 
 /* Experience v2 */
-/* Experience v2 */
 /* ---------- EXPERIENCE v2 (cleaned) ---------- */
+/* -------- EXPERIENCE SECTION -------- */
 .experience-section {
   padding: 6rem 0;
   background-color: #FBF9F9;
@@ -727,23 +726,22 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0 2rem;
 }
 
-/* parent is column of rows; gap controls even vertical spacing between circle+card pairs */
+/* Timeline container */
 .timeline-v2 {
   position: relative;
   margin-top: 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;      
+  gap: 3rem;
   align-items: stretch;
-  text-align: justify;
 }
 
-/* vertical center line — behind everything (z-index: 0) */
+/* vertical center line */
 .timeline-v2::before {
   content: '';
   position: absolute;
   left: 50%;
-  top: 0;                    /* stretch full height */
+  top: 0;
   bottom: 0;
   transform: translateX(-50%);
   width: 4px;
@@ -751,59 +749,106 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 0;
 }
 
-
-/* each row is a 3-column grid: left card | center (circle) | right card */
+/* each row */
 .timeline-row {
   display: grid;
   grid-template-columns: 1fr 120px 1fr;
-  align-items: start;     /* ⬅️ align circle + card to top */
+  align-items: start;
   justify-items: center;
   position: relative;
 }
 
+/* logo circle */
 .timeline-logo {
   grid-column: 2;
-  align-self: start;      /* ⬅️ circle aligns with top of row */
-  justify-self: center;
   width: 70px;
   height: 70px;
   border-radius: 50%;
+  background: #fff;
+  border: 2px solid #000;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  background: var(--logo-bg, #FF8762);
-  border: 4px solid #fff;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
+
 .timeline-logo-img {
   width: 65%;
   height: 65%;
   object-fit: contain;
-  border-radius: 50%; 
-  border-color: #000;/* keeps them circular */
+  border-radius: 50%;
 }
-
-
 
 /* card styling */
 .timeline-card {
   background: #fff;
   border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-  padding: 1.25rem 1.25rem 1.1rem;
-  max-width: 520px;
-  opacity: 0;             /* start invisible */
-  transform: translateY(30px); /* start slightly down */
-  animation: slideUp 0.8s ease-out forwards;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  padding: 1.25rem;
+  max-width: 480px;
 }
 
-.timeline-card.left {
-  animation-name: slideLeft;
+/* text styles */
+
+/* -------- RESPONSIVE -------- */
+
+/* Tablet (≤ 992px) */
+@media (max-width: 992px) {
+  .timeline-row {
+    grid-template-columns: 1fr 100px 1fr;
+  }
+  .timeline-logo { width: 55px; height: 55px; }
+  .timeline-card { max-width: 400px; }
 }
-.timeline-card.right {
-  animation-name: slideRight;
+
+/* Mobile Stack (≤ 768px) */
+/* Mobile Stack (≤ 768px) */
+@media (max-width: 768px) {
+  .timeline-v2::before {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .timeline-row {
+    grid-template-columns: 1fr;   /* single column */
+    gap: 1rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .timeline-logo {
+    grid-column: auto;
+    margin-bottom: 1rem;
+    width: 60px;
+    height: 60px;
+  }
+
+  .timeline-card {
+    grid-column: auto;
+    text-align: center;
+    justify-self: center;
+    max-width: 90%;   /* prevent edge overlap */
+  }
+
+  /* override alternating styles */
+  .timeline-card.left,
+  .timeline-card.right {
+    text-align: center;
+    justify-self: center;
+  }
 }
+
+
+/* Small Mobile (≤ 480px) */
+@media (max-width: 480px) {
+  .timeline-logo { width: 45px; height: 45px; }
+  .experience-role { font-size: 1rem; }
+  .experience-company,
+  .experience-duration { font-size: 0.8rem; }
+  .experience-points li { font-size: 0.85rem; }
+}
+
 
 @keyframes slideLeft {
   from {
@@ -828,9 +873,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-/* left/right placement */
-.timeline-card.left { grid-column: 1 / 2; justify-self: end; text-align: right; }
-.timeline-card.right { grid-column: 3 / 4; justify-self: start; text-align: left; }
+/* left/right placement (desktop only) */
+@media (min-width: 769px) {
+  .timeline-card.left { grid-column: 1 / 2; justify-self: end; text-align: right; }
+  .timeline-card.right { grid-column: 3 / 4; justify-self: start; text-align: left; }
+}
 
 /* small content styling */
 .timeline-card-header { margin-bottom: 0.5rem; text-align: justify; }
@@ -859,23 +906,29 @@ h1, h2, h3, h4, h5, h6 {
 /* ---------- Hamburger Menu ---------- */
 /* Hamburger Button */
 .hamburger {
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 24px;
   height: 18px;
+  background: none;
+  border: none;
   cursor: pointer;
-  z-index: 1100;
 }
 
 .hamburger span {
   display: block;
-  height: 3px;
+  height: 2px;
   width: 100%;
-  background: #333;
+  background: white;
   border-radius: 2px;
-  transition: all 0.3s ease;
 }
+.hamburger { display: none; }
+
+@media (max-width: 768px) {
+ 
+}
+
 
 /* When active (cross animation) */
 .hamburger.active span:nth-child(1) {
@@ -960,13 +1013,13 @@ h1, h2, h3, h4, h5, h6 {
   .hero-title { font-size: clamp(2rem, 5vw, 2.5rem); }
   .hero-buttons { justify-content: center; }
   .projects-grid { grid-template-columns: 1fr; }
-  .timeline::before { left: 30px; }
+  /* .timeline::before { left: 30px; }
   .timeline-connector { left: 30px; }
   .timeline-content {
     margin-left: 60px;
     flex-direction: column;
     gap: 1rem;
-  }
+  } */
   .footer-container {
     grid-template-columns: 1fr;
     text-align: center;
@@ -981,19 +1034,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-/* Timeline stack (≤700px) */
-@media (max-width: 700px) {
-  .timeline-v2::before { left: 24px; transform: none; top: 24px; bottom: 24px; }
-  .timeline-row {
-    grid-template-columns: 48px 1fr;
-    gap: 0.75rem;
-    align-items: start;
-  }
-  .timeline-logo { grid-column: 1 / 2; }
-  .timeline-card { grid-column: 2 / 3; text-align: left; justify-self: start; }
-}
-
-/* Mobile (≤480px) */
 @media (max-width: 480px) {
   .hero, .about { padding: 3rem 1rem; }
   .hero-title { font-size: clamp(1.8rem, 6vw, 2rem); }
