@@ -31,7 +31,7 @@ const Projects = () => {
       description: "Designing full UI including research, icon, wireframes, design system.",
       logo: kosh,
       logoColor: "#10B981",
-      link: "https://www.figma.com/proto/tAaxB2B2AwnLUHk5Ze5ERy/Kosh?page-id=0%3A1&node-id=93-3&t=ahyUMWFt6wqnjvrJ-1"
+      link: "https://kkosh.in/"
     },
     {
       id: 4,
@@ -77,7 +77,7 @@ const Projects = () => {
                     rel="noopener noreferrer"
                     className="project-link"
                   >
-                    View Prototype →
+                    View Website →
                   </a>
                 )}
 
