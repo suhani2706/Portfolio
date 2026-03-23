@@ -21,7 +21,7 @@ const Resume = () => {
           {/* force download */}
           <a
             href="/resume.pdf"
-            download="Suhani_Mathur_Resume.pdf"
+            download="resumeSuhani.pdf"
             className="btn btn-secondary"
           >
             Download Resume
@@ -31,7 +31,7 @@ const Resume = () => {
         {/* embedded preview */}
         <div className="resume-preview">
           <iframe
-            src="/resume.pdf"
+            src="/resumeSuhani.pdf"
             title="Suhani Mathur Resume"
             className="resume-iframe"
           ></iframe>
