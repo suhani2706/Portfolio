@@ -10,7 +10,7 @@ const Resume = () => {
         <div className="resume-buttons">
           {/* open in new tab */}
           <a
-            href="/resume.pdf"
+            href="/Suhani Mathur-CV (1).pdf"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-secondary"
