@@ -1,39 +1,47 @@
-import React from "react";
+// src/components/MyResume.jsx
+import React from 'react';
+import { FiEye, FiDownload } from 'react-icons/fi';
 
 const Resume = () => {
   return (
     <section className="resume-section" id="resume">
-      <div className="resume-container">
-        <h2 className="section-title">Resume</h2>
-        <p className="section-subtitle">Get to know my journey</p>
+      <div className="container resume-container-editorial">
+        {/* Section Header */}
+        <div className="section-header-editorial">
+          <span className="section-label">Credentials</span>
+          <h2 className="section-title-large">
+            Professional <span className="italic">Resume</span>
+          </h2>
+          <p className="section-subtitle">
+            My experience, education, and technical competencies at a glance.
+          </p>
+        </div>
 
-        <div className="resume-buttons">
-          {/* open in new tab */}
+        {/* Action Buttons */}
+        <div className="resume-buttons-editorial">
           <a
             href="/resumeSuhani.pdf"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-secondary"
+            className="btn btn-primary"
           >
-            View Resume
+            View PDF <FiEye />
           </a>
-
-          {/* force download */}
           <a
             href="/resume.pdf"
             download="resumeSuhani.pdf"
             className="btn btn-secondary"
           >
-            Download Resume
+            Download PDF <FiDownload />
           </a>
         </div>
 
-        {/* embedded preview */}
-        <div className="resume-preview">
+        {/* Embedded Iframe Preview */}
+        <div className="resume-preview-frame">
           <iframe
             src="/resumeSuhani.pdf"
-            title="Suhani Mathur Resume"
-            className="resume-iframe"
+            title="Suhani Mathur Resume PDF"
+            className="resume-iframe-editorial"
           ></iframe>
         </div>
       </div>

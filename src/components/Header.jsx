@@ -1,105 +1,66 @@
 // src/components/Header.jsx
-import React, { useEffect, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React from 'react';
+import blackPinImg from '../assets/black_pin.png';
 
 const Header = () => {
-  const [activeSection, setActiveSection] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false); // state for mobile menu
-  const location = useLocation();
-
-  const navItems = [
-    { id: "about", label: "About" },
-    { id: "toolbox", label: "Skills" },
-    { id: "work", label: "Work" },
-    { id: "experience", label: "Experience" },
-    { id: "contact", label: "Contact" },
-  ];
-
-  useEffect(() => {
-    if (location.pathname !== '/') return;
-
-    const sections = Array.from(document.querySelectorAll('section[id]'));
-    if (!sections.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter(e => e.isIntersecting);
-
-        if (visible.length) {
-          const best = visible.reduce((a, b) =>
-            a.intersectionRatio > b.intersectionRatio ? a : b
-          );
-          setActiveSection(best.target.id);
-          return;
-        }
-
-        let closest = null;
-        let closestDistance = Infinity;
-        sections.forEach(s => {
-          const rect = s.getBoundingClientRect();
-          const distance = Math.abs(rect.top - (window.innerHeight * 0.12));
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closest = s;
-          }
-        });
-        if (closest) setActiveSection(closest.id);
-      },
-      { rootMargin: "-30% 0px -30% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
-    );
-
-    sections.forEach(s => observer.observe(s));
-    return () => sections.forEach(s => observer.unobserve(s));
-  }, [location.pathname]);
+  const handleScrollToContact = (e) => {
+    e.preventDefault();
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
-    <header className="header">
-  <div className="header-container">
-    {/* Logo Left */}
-    <div className="logo">
-      <a href="/">
-        <h1>Suhani Mathur</h1>
-      </a>
-    </div>
+    <header className="header-editorial">
+      <div className="header-container-editorial">
+        {/* Brand Bounding Box Logo */}
+        <a href="#hero" className="brand-logo-link" aria-label="Suhani Mathur Home">
+          <div className="brand-bounding-box-container">
+            {/* Minimal Figma-style Cursor icon */}
+            <div className="brand-cursor">
+              <svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0V14.5L4.5 10L8.5 14L10.5 12L6.5 8L12.5 7.5L0 0Z" fill="black" />
+              </svg>
+            </div>
+            
+            {/* Bounding box with selection handles */}
+            <div className="brand-bounding-box">
+              <div className="brand-corner brand-corner-tl"></div>
+              <div className="brand-corner brand-corner-tr"></div>
+              <div className="brand-corner brand-corner-bl"></div>
+              <div className="brand-corner brand-corner-br"></div>
+              <div className="brand-text-row">suhani</div>
+              <div className="brand-text-row">mathur</div>
+            </div>
+          </div>
+        </a>
 
-    {/* Hamburger Right */}
-    <button
-      className={`hamburger ${menuOpen ? "open" : ""}`}
-      onClick={() => setMenuOpen(!menuOpen)}
-      aria-label="Toggle navigation menu"
-    >
-      <span></span><span></span><span></span>
-    </button>
+        {/* Pinned Action Buttons */}
+        <div className="header-actions-editorial">
+          {/* Resume button with push pin icon */}
+          <a
+            href="/resumeSuhani.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-pinned btn-pinned-resume hanging-button"
+          >
+            <img src={blackPinImg} alt="" className="button-pin-image" />
+            Resume
+          </a>
 
-    {/* Nav Menu */}
-    <nav className={`nav-menu ${menuOpen ? "show" : ""}`}>
-      <ul className="nav-links">
-        {navItems.map(({ id, label }) => (
-          <li key={id}>
-            <a
-              href={location.pathname === "/" ? `#${id}` : `/#${id}`}
-              className={location.pathname === "/" && activeSection === id ? "active" : ""}
-              onClick={() => setMenuOpen(false)}
-            >
-              {label}
-            </a>
-          </li>
-        ))}
-      </ul>
-
-      <div className="resume-btn">
-        <Link
-          to="/resume"
-          className={`btn btn-secondary ${location.pathname === "/resume" ? "active" : ""}`}
-          onClick={() => setMenuOpen(false)}
-        >
-          Resume
-        </Link>
+          {/* Let's Talk button */}
+          <a
+            href="#contact"
+            onClick={handleScrollToContact}
+            className="btn-pinned btn-pinned-talk hanging-button"
+          >
+            <img src={blackPinImg} alt="" className="button-pin-image" />
+            Let's Talk
+          </a>
+        </div>
       </div>
-    </nav>
-  </div>
-</header>
-
+    </header>
   );
 };
 

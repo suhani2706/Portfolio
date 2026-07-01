@@ -1,0 +1,22 @@
+# Redesign Tasks
+
+- [x] Update index.html and configure typography imports (Satoshi + Inter)
+- [x] Implement BackgroundGrid component with scroll-linked opacity and parallax
+- [x] Update Header component (navbar layout, Figma bounding box brand, pinned button styles)
+- [x] Update Hero component (two-column layout, custom Figma floating toolbar, floating icons, grounding line)
+- [x] Update About component (Section 01 - Philosophy & Interest List)
+- [x] Update Toolbox component (Section 02 - Horizontal Inventory cards)
+- [x] Update Projects component (Section 03 - 2x2 project grid + wide CTA card)
+- [x] Create BehindScenes component (Section 04 - 4 minimal traits cards)
+- [x] Update Footer component (Section 05 - contact details, bottom copyright and back-to-top)
+- [x] Refactor App.jsx (routing simplification, page composition, intersection observer hooks)
+- [x] Complete vanilla CSS styling in App.css (editorial layouts, monochrome aesthetics, custom scroll effects)
+- [x] Compile and verify the build
+- [x] Remove all image assets from components (Hero illustration, project mockups)
+- [x] Re-center hero section and implement typographic card descriptions
+- [x] Compile and verify build success with zero packaged image assets
+- [x] Locate user-attached avatar in app data folder
+- [x] Enhance avatar image quality (increase resolution/clarity) using AI image generation tool
+- [x] Copy enhanced avatar image to project assets (`src/assets/suhani.png`)
+- [x] Restore 2-column Hero section layout (Hero.jsx + App.css grid columns, empathy pointer, grounding line)
+- [x] Compile and verify dev server status
