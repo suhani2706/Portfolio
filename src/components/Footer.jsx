@@ -1,9 +1,11 @@
 // src/components/Footer.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 import illustrationImage from '../assets/popup.png';
 
-const Footer = () => {
+const Footer = ({ openContactModal, isContactModalOpen, closeContactModal }) => {
   const [modalView, setModalView] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -75,23 +77,47 @@ const Footer = () => {
     if (type === 'mail') {
       openGmailCompose();
       setModalView(null);
+      closeContactModal();
       return;
     }
 
     setModalView('form');
   };
 
+  const saveInquiryToFirestore = async (details = {}) => {
+    try {
+      await addDoc(collection(db, 'portfolioInquiries'), {
+        name: details.name || '',
+        email: details.email || '',
+        phone: details.phone || '',
+        message: details.message || '',
+        createdAt: serverTimestamp(),
+        source: 'portfolio-contact-form'
+      });
+    } catch (error) {
+      console.warn('Firestore save failed:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     await sendWithEmailJS(formData);
+    await saveInquiryToFirestore(formData);
     setModalView(null);
     setFormData({ name: '', email: '', phone: '', message: '' });
+    closeContactModal();
   };
 
   const closeModal = () => {
     setModalView(null);
     setFormData({ name: '', email: '', phone: '', message: '' });
+    closeContactModal();
   };
+
+  useEffect(() => {
+    if (!isContactModalOpen) return;
+    setModalView('choice');
+  }, [isContactModalOpen]);
 
   return (
     <>
@@ -142,7 +168,9 @@ const Footer = () => {
               <button
                 type="button"
                 className="btn-pinned footer-cta-link"
-                onClick={() => setModalView('choice')}
+                onClick={() => {
+                  openContactModal();
+                }}
               >
                 Let's Collaborate
               </button>

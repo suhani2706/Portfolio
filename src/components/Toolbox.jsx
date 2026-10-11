@@ -6,16 +6,17 @@ const Toolbox = () => {
     { num: '01', name: 'Figma' },
     { num: '02', name: 'Photoshop' },
     { num: '03', name: 'Illustrator' },
-    { num: '04', name: 'HTML / CSS' },
-    { num: '05', name: 'Canva' },
-    { num: '06', name: 'VS Code' }
+    { num: '04', name: 'Adobe Express' },
+    { num: '05', name: 'Zeplin' },
+    { num: '06', name: 'Adobe XD' },
+    { num: '07', name: 'FigJam' }
   ];
 
   return (
     <section className="toolbox-editorial" id="toolbox">
       <div className="container">
         <div className="section-header-editorial-small" style={{ marginBottom: '3rem' }}>
-          <span className="editorial-section-number">02</span>
+          <span className="editorial-section-number">03</span>
           <h2 className="editorial-section-title">Toolbox.</h2>
         </div>
 

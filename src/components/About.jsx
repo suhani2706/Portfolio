@@ -31,7 +31,7 @@ const About = () => {
         {/* Left Side: Statement and Description */}
         <div className="about-left-editorial">
           <div className="section-header-editorial-small">
-            <span className="editorial-section-number">01</span>
+            <span className="editorial-section-number">04</span>
             <h2 className="editorial-section-title">About me.</h2>
           </div>
           

@@ -2,12 +2,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import suhaniImg from '../assets/suhani.png';
 
+const commentStorageKey = 'figmaPortfolioComments';
+
 const Hero = () => {
   const [activeTool, setActiveTool] = useState('cursor');
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [selectedId, setSelectedId] = useState(null);
-
-  // Editable translations (dx, dy)
   const [offsets, setOffsets] = useState({
     zCard: { x: 0, y: 0 },
     cmdCard: { x: 0, y: 0 },
@@ -16,8 +16,6 @@ const Hero = () => {
     pillBadge: { x: 0, y: 0 },
     headline: { x: 0, y: 0 }
   });
-
-  // Editable rotations
   const [rotations, setRotations] = useState({
     zCard: 0,
     cmdCard: 0,
@@ -26,19 +24,67 @@ const Hero = () => {
     pillBadge: 0,
     headline: 0
   });
-
-  // Drawn elements
   const [shapes, setShapes] = useState([]);
   const [textBlocks, setTextBlocks] = useState([]);
   const [penPaths, setPenPaths] = useState([]);
   const [currentPath, setCurrentPath] = useState([]);
-
-  // Canvas drawing states (Pencil)
+  const [history, setHistory] = useState([]);
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingShape, setDrawingShape] = useState(null);
 
-  // Handle canvas dimensions on resize or tool activation
+  const getSnapshot = () => ({
+    shapes,
+    textBlocks,
+    comments,
+    penPaths,
+    pan,
+    offsets,
+    rotations,
+  });
+
+  const restoreSnapshot = (snapshot) => {
+    if (!snapshot) return;
+    setShapes(snapshot.shapes || []);
+    setTextBlocks(snapshot.textBlocks || []);
+    setComments(snapshot.comments || []);
+    setPenPaths(snapshot.penPaths || []);
+    setPan(snapshot.pan || { x: 0, y: 0 });
+    setOffsets(snapshot.offsets || {
+      zCard: { x: 0, y: 0 },
+      cmdCard: { x: 0, y: 0 },
+      empathyNote: { x: 0, y: 0 },
+      illustration: { x: 0, y: 0 },
+      pillBadge: { x: 0, y: 0 },
+      headline: { x: 0, y: 0 }
+    });
+    setRotations(snapshot.rotations || {
+      zCard: 0,
+      cmdCard: 0,
+      empathyNote: -3,
+      illustration: 0,
+      pillBadge: 0,
+      headline: 0
+    });
+    setSelectedId(null);
+  };
+
+  const pushHistory = () => {
+    setHistory(prev => [...prev, getSnapshot()]);
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedComments = JSON.parse(localStorage.getItem(commentStorageKey) || '[]');
+      if (Array.isArray(savedComments)) {
+        // keep storage behavior intentionally empty; comments are removed from the editor
+      }
+    } catch (error) {
+      console.warn('Unable to read saved comments:', error);
+    }
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
       if (canvasRef.current) {
@@ -53,69 +99,47 @@ const Hero = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [activeTool]);
 
-  // Tools configuration
   const tools = [
     { id: 'cursor', name: 'Select / Move', icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="3 3 10.07 19.97 12.58 12.58 19.97 10.07 3 3" />
       </svg>
     )},
-    { id: 'hand', name: 'Hand (Pan Canvas)', icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5" />
-        <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6" />
-        <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4.5" />
-        <path d="M6 10V8a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v9a7 7 0 0 0 7 7h3a7 7 0 0 0 7-7v-3" />
-      </svg>
-    )},
-    { id: 'pencil', name: 'Pencil (Draw)', icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20h9" />
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-      </svg>
-    )},
-    { id: 'shapes', name: 'Rectangle Tool', icon: (
+    { id: 'rectangle', name: 'Rectangle', icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
       </svg>
     )},
-    { id: 'rotate', name: 'Rotate (Click to Turn)', icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-      </svg>
-    )},
-    { id: 'pen', name: 'Pen (Vector Line)', icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
-    )},
-    { id: 'text', name: 'Text Tool (Inline/Add)', icon: (
+    { id: 'text', name: 'Text', icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="4 7 4 4 20 4 20 7" />
         <line x1="9" y1="20" x2="15" y2="20" />
         <line x1="12" y1="4" x2="12" y2="20" />
       </svg>
+    )},
+    { id: 'pen', name: 'Pen', icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+      </svg>
+    )},
+    { id: 'frame', name: 'Frame', icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <path d="M3 9h18M9 3v18" />
+      </svg>
     )}
   ];
 
-  // Drag-and-drop mechanics for pre-existing elements
   const startDrag = (e, elementId) => {
-    if (activeTool !== 'cursor' && activeTool !== 'rotate') return;
-    e.stopPropagation();
+    if (activeTool !== 'cursor') return;
     e.preventDefault();
-
-    if (activeTool === 'rotate') {
-      setRotations(prev => ({
-        ...prev,
-        [elementId]: (prev[elementId] + 15) % 360
-      }));
-      return;
-    }
+    e.stopPropagation();
 
     const startX = e.clientX;
     const startY = e.clientY;
-    const initX = offsets[elementId].x;
-    const initY = offsets[elementId].y;
+    const initX = offsets[elementId]?.x ?? 0;
+    const initY = offsets[elementId]?.y ?? 0;
 
     const handleMouseMove = (moveEvent) => {
       const dx = moveEvent.clientX - startX;
@@ -135,52 +159,39 @@ const Hero = () => {
     window.addEventListener('mouseup', handleMouseUp);
   };
 
-  // Global mouse handlers on drawing overlay
   const handleMouseDown = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    if (activeTool === 'hand') {
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const initPanX = pan.x;
-      const initPanY = pan.y;
-
-      const handlePan = (moveEv) => {
-        setPan({
-          x: initPanX + (moveEv.clientX - startX),
-          y: initPanY + (moveEv.clientY - startY)
-        });
-      };
-      const handlePanUp = () => {
-        window.removeEventListener('mousemove', handlePan);
-        window.removeEventListener('mouseup', handlePanUp);
-      };
-      window.addEventListener('mousemove', handlePan);
-      window.addEventListener('mouseup', handlePanUp);
-      return;
-    }
-
-    if (activeTool === 'shapes') {
-      setDrawingShape({ startX: x, startY: y, currentX: x, currentY: y });
-      return;
-    }
-
-    if (activeTool === 'pencil') {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      setIsDrawing(true);
+    if (activeTool === 'rectangle' || activeTool === 'frame') {
+      setDrawingShape({
+        type: activeTool,
+        startX: x,
+        startY: y,
+        currentX: x,
+        currentY: y,
+      });
       return;
     }
 
     if (activeTool === 'pen') {
       setCurrentPath(prev => [...prev, { x, y }]);
+      return;
+    }
+
+    if (activeTool === 'text') {
+      const newTextBlock = {
+        id: Date.now(),
+        left: x,
+        top: y,
+        text: 'Type something...',
+        dx: 0,
+        dy: 0,
+      };
+      pushHistory();
+      setTextBlocks(prev => [...prev, newTextBlock]);
+      setSelectedId(newTextBlock.id);
     }
   };
 
@@ -189,82 +200,62 @@ const Hero = () => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    if (activeTool === 'shapes' && drawingShape) {
+    if ((activeTool === 'rectangle' || activeTool === 'frame') && drawingShape) {
       setDrawingShape(prev => ({ ...prev, currentX: x, currentY: y }));
-    }
-
-    if (activeTool === 'pencil' && isDrawing) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      ctx.lineTo(x, y);
-      ctx.stroke();
     }
   };
 
-  const handleMouseUp = (e) => {
-    if (activeTool === 'shapes' && drawingShape) {
-      const { startX, startY, currentX, currentY } = drawingShape;
+  const handleMouseUp = () => {
+    if ((activeTool === 'rectangle' || activeTool === 'frame') && drawingShape) {
+      const { startX, startY, currentX, currentY, type } = drawingShape;
       const width = Math.abs(currentX - startX);
       const height = Math.abs(currentY - startY);
       const left = Math.min(startX, currentX);
       const top = Math.min(startY, currentY);
 
-      if (width > 5 && height > 5) {
-        setShapes(prev => [
-          ...prev,
-          {
-            id: Date.now(),
-            left,
-            top,
-            width,
-            height,
-            color: 'rgba(0, 0, 0, 0.02)',
-            borderColor: '#000000',
-            dx: 0,
-            dy: 0
-          }
-        ]);
+      if (width > 8 && height > 8) {
+        const newShape = {
+          id: Date.now(),
+          left,
+          top,
+          width,
+          height,
+          color: type === 'frame' ? 'rgba(47, 128, 237, 0.04)' : 'rgba(0, 0, 0, 0.02)',
+          borderColor: type === 'frame' ? '#2f80ed' : '#000000',
+          dx: 0,
+          dy: 0,
+          type,
+          label: type === 'frame' ? 'Frame' : 'Rectangle',
+        };
+        pushHistory();
+        setShapes(prev => [...prev, newShape]);
       }
+
       setDrawingShape(null);
+      return;
     }
 
-    if (activeTool === 'pencil') {
-      setIsDrawing(false);
-    }
-  };
-
-  // Create text blocks on click (Text Tool)
-  const handleOverlayClick = (e) => {
-    if (activeTool !== 'text') return;
-    if (e.target !== e.currentTarget && !e.target.classList.contains('canvas-interactive-overlay')) return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    setTextBlocks(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        left: x,
-        top: y,
-        text: 'Type something...',
-        dx: 0,
-        dy: 0
-      }
-    ]);
-  };
-
-  // Finalize vector pen paths on double click
-  const handleOverlayDoubleClick = () => {
     if (activeTool === 'pen' && currentPath.length > 1) {
+      pushHistory();
       setPenPaths(prev => [...prev, currentPath]);
       setCurrentPath([]);
     }
   };
 
-  // Reset entire editor canvas
+  const handleOverlayClick = (e) => {
+    if (activeTool !== 'text') return;
+    if (e.target !== e.currentTarget && !e.target.classList.contains('canvas-interactive-overlay')) return;
+  };
+
+  const handleUndo = () => {
+    if (!history.length) return;
+    const previous = history[history.length - 1];
+    setHistory(prev => prev.slice(0, -1));
+    restoreSnapshot(previous);
+  };
+
   const handleResetCanvas = () => {
+    pushHistory();
     setOffsets({
       zCard: { x: 0, y: 0 },
       cmdCard: { x: 0, y: 0 },
@@ -286,68 +277,53 @@ const Hero = () => {
     setPenPaths([]);
     setCurrentPath([]);
     setPan({ x: 0, y: 0 });
-    
+
     if (canvasRef.current) {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
     }
+
     setSelectedId(null);
   };
 
   return (
     <section className={`hero-editorial tool-cursor-${activeTool}`} id="hero">
-      
-      {/* Drawing Canvas & Overlay Layers */}
-      <div 
+      <div
         className="canvas-interactive-overlay"
         style={{ pointerEvents: activeTool === 'cursor' ? 'none' : 'auto' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onClick={handleOverlayClick}
-        onDoubleClick={handleOverlayDoubleClick}
       >
-        {/* Sketch Canvas Overlay (Pencil Mode) */}
-        <canvas 
-          ref={canvasRef} 
+        <canvas
+          ref={canvasRef}
           className="pencil-drawing-canvas"
-          style={{ pointerEvents: activeTool === 'pencil' ? 'auto' : 'none' }}
+          style={{ pointerEvents: activeTool === 'pen' ? 'auto' : 'none' }}
         />
 
-        {/* Dynamic shapes drawing preview */}
         {drawingShape && (
-          <div 
+          <div
             style={{
               position: 'absolute',
               left: Math.min(drawingShape.startX, drawingShape.currentX),
               top: Math.min(drawingShape.startY, drawingShape.currentY),
               width: Math.abs(drawingShape.currentX - drawingShape.startX),
               height: Math.abs(drawingShape.currentY - drawingShape.startY),
-              border: '1.5px dashed #000000',
-              backgroundColor: 'rgba(0, 0, 0, 0.05)',
+              border: drawingShape.type === 'frame' ? '1.5px dashed #2f80ed' : '1.5px dashed #000000',
+              backgroundColor: drawingShape.type === 'frame' ? 'rgba(47, 128, 237, 0.04)' : 'rgba(0, 0, 0, 0.05)',
               zIndex: 2,
-              pointerEvents: 'none'
+              pointerEvents: 'none',
             }}
           />
         )}
 
-        {/* Render Vector Paths (Pen Tool) */}
-        <svg 
-          style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            width: '100%', 
-            height: '100%', 
-            pointerEvents: 'none',
-            zIndex: 3
-          }}
-        >
+        <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 3 }}>
           {penPaths.map((path, idx) => (
             <polyline
               key={idx}
-              points={path.map(p => `${p.x},${p.y}`).join(' ')}
+              points={path.map(point => `${point.x},${point.y}`).join(' ')}
               stroke="#000000"
               strokeWidth="2.5"
               strokeLinecap="round"
@@ -357,16 +333,15 @@ const Hero = () => {
           ))}
           {currentPath.length > 0 && (
             <polyline
-              points={currentPath.map(p => `${p.x},${p.y}`).join(' ')}
+              points={currentPath.map(point => `${point.x},${point.y}`).join(' ')}
               stroke="#2f80ed"
               strokeWidth="2"
-              strokeDasharray="4 4"
               fill="none"
+              strokeDasharray="4 4"
             />
           )}
         </svg>
 
-        {/* Render Custom Rectangles (Shapes) */}
         {shapes.map((shape) => (
           <div
             key={shape.id}
@@ -381,29 +356,36 @@ const Hero = () => {
               border: selectedId === shape.id ? '2px solid #2f80ed' : `1.5px solid ${shape.borderColor}`,
               transform: `translate(${shape.dx}px, ${shape.dy}px)`,
               cursor: activeTool === 'cursor' ? 'move' : 'default',
-              zIndex: 4
+              zIndex: 4,
             }}
-            onMouseDown={(e) => {
+            onMouseDown={(event) => {
               if (activeTool !== 'cursor') return;
-              e.stopPropagation();
-              const startX = e.clientX;
-              const startY = e.clientY;
-              const initDx = shape.dx;
-              const initDy = shape.dy;
+              event.stopPropagation();
+              const startX = event.clientX;
+              const startY = event.clientY;
+              const initialDx = shape.dx;
+              const initialDy = shape.dy;
 
-              const handleShapeDrag = (moveEv) => {
-                const dx = moveEv.clientX - startX;
-                const dy = moveEv.clientY - startY;
-                setShapes(prev => prev.map(s => s.id === shape.id ? { ...s, dx: initDx + dx, dy: initDy + dy } : s));
+              const handleShapeDrag = (moveEvent) => {
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
+                setShapes(prev => prev.map(item => item.id === shape.id ? { ...item, dx: initialDx + dx, dy: initialDy + dy } : item));
               };
+
               const handleShapeDragEnd = () => {
                 window.removeEventListener('mousemove', handleShapeDrag);
                 window.removeEventListener('mouseup', handleShapeDragEnd);
               };
+
               window.addEventListener('mousemove', handleShapeDrag);
               window.addEventListener('mouseup', handleShapeDragEnd);
             }}
           >
+            {shape.type === 'frame' && (
+              <span style={{ position: 'absolute', top: -18, left: 0, fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2f80ed', fontWeight: 700 }}>
+                {shape.label}
+              </span>
+            )}
             {selectedId === shape.id && activeTool === 'cursor' && (
               <>
                 <div className="shape-selection-handle tl" />
@@ -415,7 +397,7 @@ const Hero = () => {
                   title="Delete element"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShapes(prev => prev.filter(s => s.id !== shape.id));
+                    setShapes(prev => prev.filter(item => item.id !== shape.id));
                     setSelectedId(null);
                   }}
                 >
@@ -426,7 +408,6 @@ const Hero = () => {
           </div>
         ))}
 
-        {/* Render Custom text boxes */}
         {textBlocks.map((block) => (
           <div
             key={block.id}
@@ -439,25 +420,27 @@ const Hero = () => {
               border: selectedId === block.id ? '2px solid #2f80ed' : '1px dashed transparent',
               padding: '4px 8px',
               cursor: activeTool === 'cursor' ? 'move' : 'text',
-              zIndex: 5
+              zIndex: 5,
             }}
-            onMouseDown={(e) => {
+            onMouseDown={(event) => {
               if (activeTool !== 'cursor') return;
-              e.stopPropagation();
-              const startX = e.clientX;
-              const startY = e.clientY;
-              const initDx = block.dx;
-              const initDy = block.dy;
+              event.stopPropagation();
+              const startX = event.clientX;
+              const startY = event.clientY;
+              const initialDx = block.dx;
+              const initialDy = block.dy;
 
-              const handleTextDrag = (moveEv) => {
-                const dx = moveEv.clientX - startX;
-                const dy = moveEv.clientY - startY;
-                setTextBlocks(prev => prev.map(t => t.id === block.id ? { ...t, dx: initDx + dx, dy: initDy + dy } : t));
+              const handleTextDrag = (moveEvent) => {
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
+                setTextBlocks(prev => prev.map(item => item.id === block.id ? { ...item, dx: initialDx + dx, dy: initialDy + dy } : item));
               };
+
               const handleTextDragEnd = () => {
                 window.removeEventListener('mousemove', handleTextDrag);
                 window.removeEventListener('mouseup', handleTextDragEnd);
               };
+
               window.addEventListener('mousemove', handleTextDrag);
               window.addEventListener('mouseup', handleTextDragEnd);
             }}
@@ -465,19 +448,19 @@ const Hero = () => {
             <div
               contentEditable={activeTool === 'text'}
               suppressContentEditableWarning
-              onBlur={(e) => {
-                const newText = e.target.innerText.trim();
-                if (!newText) {
-                  setTextBlocks(prev => prev.filter(t => t.id !== block.id));
+              onBlur={(event) => {
+                const nextText = event.target.innerText.trim();
+                if (!nextText) {
+                  setTextBlocks(prev => prev.filter(item => item.id !== block.id));
                 } else {
-                  setTextBlocks(prev => prev.map(t => t.id === block.id ? { ...t, text: newText } : t));
+                  setTextBlocks(prev => prev.map(item => item.id === block.id ? { ...item, text: nextText } : item));
                 }
               }}
               style={{
                 outline: 'none',
                 fontFamily: 'var(--font-body)',
                 fontSize: '1rem',
-                color: 'var(--text-main)'
+                color: 'var(--text-main)',
               }}
             >
               {block.text}
@@ -489,7 +472,7 @@ const Hero = () => {
                 title="Delete text block"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setTextBlocks(prev => prev.filter(t => t.id !== block.id));
+                  setTextBlocks(prev => prev.filter(item => item.id !== block.id));
                   setSelectedId(null);
                 }}
               >
@@ -498,80 +481,68 @@ const Hero = () => {
             )}
           </div>
         ))}
+
       </div>
 
-      {/* Editor Canvas Board */}
-      <div 
+      <div
         className="container hero-container-grid hero-canvas-board"
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px)`,
           transition: isDrawing || drawingShape ? 'none' : 'transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
-        {/* Left Column */}
         <div className="hero-left-editorial">
-          {/* Draggable Tagline Pill */}
-          <div 
-            className={`hero-pill-badge draggable-editor-element ${activeTool === 'rotate' ? 'rotatable' : ''}`}
-            onMouseDown={(e) => startDrag(e, 'pillBadge')}
+          <div
+            className="hero-pill-badge draggable-editor-element"
+            onMouseDown={(event) => startDrag(event, 'pillBadge')}
             style={{
               transform: `translate(${offsets.pillBadge.x}px, ${offsets.pillBadge.y}px) rotate(${rotations.pillBadge}deg)`,
-              cursor: activeTool === 'cursor' ? 'grab' : activeTool === 'rotate' ? 'pointer' : 'default'
+              cursor: activeTool === 'cursor' ? 'grab' : 'default',
             }}
           >
-            <span 
-              contentEditable={activeTool === 'text'} 
-              suppressContentEditableWarning
-              className="inline-editor-text"
-            >
+            <span contentEditable={activeTool === 'text'} suppressContentEditableWarning className="inline-editor-text">
               UI Design Portfolio
             </span>
             <span className="pill-star-badge">✦</span>
           </div>
 
-          {/* Floating Figma elements */}
-          <div 
-            className={`floating-element float-z-card draggable-editor-element ${activeTool === 'rotate' ? 'rotatable' : ''}`}
-            onMouseDown={(e) => startDrag(e, 'zCard')}
+          <div
+            className="floating-element float-z-card draggable-editor-element"
+            onMouseDown={(event) => startDrag(event, 'zCard')}
             style={{
               transform: `translate(${offsets.zCard.x}px, ${offsets.zCard.y}px) rotate(${rotations.zCard}deg)`,
-              cursor: activeTool === 'cursor' ? 'grab' : activeTool === 'rotate' ? 'pointer' : 'default'
+              cursor: activeTool === 'cursor' ? 'grab' : 'default',
             }}
           >
             <div className="element-inner-z">Z</div>
           </div>
-          <div 
-            className={`floating-element float-cmd-card draggable-editor-element ${activeTool === 'rotate' ? 'rotatable' : ''}`}
-            onMouseDown={(e) => startDrag(e, 'cmdCard')}
+
+          <div
+            className="floating-element float-cmd-card draggable-editor-element"
+            onMouseDown={(event) => startDrag(event, 'cmdCard')}
             style={{
               transform: `translate(${offsets.cmdCard.x}px, ${offsets.cmdCard.y}px) rotate(${rotations.cmdCard}deg)`,
-              cursor: activeTool === 'cursor' ? 'grab' : activeTool === 'rotate' ? 'pointer' : 'default'
+              cursor: activeTool === 'cursor' ? 'grab' : 'default',
             }}
           >
             <div className="element-inner-cmd">⌘</div>
           </div>
 
-          {/* Editable Headline */}
-          <h1 
-            className={`hero-headline-editorial draggable-editor-element ${activeTool === 'rotate' ? 'rotatable' : ''}`}
-            onMouseDown={(e) => startDrag(e, 'headline')}
+          <h1
+            className="hero-headline-editorial draggable-editor-element"
+            onMouseDown={(event) => startDrag(event, 'headline')}
             style={{
               transform: `translate(${offsets.headline.x}px, ${offsets.headline.y}px) rotate(${rotations.headline}deg)`,
-              cursor: activeTool === 'cursor' ? 'grab' : activeTool === 'rotate' ? 'pointer' : 'default'
+              cursor: activeTool === 'cursor' ? 'grab' : 'default',
             }}
           >
-            <span 
-              contentEditable={activeTool === 'text'}
-              suppressContentEditableWarning
-              className="inline-editor-text"
-            >
+            <span contentEditable={activeTool === 'text'} suppressContentEditableWarning className="inline-editor-text">
               All about stories, <br />
               people, books and <br />
               design.
             </span>
           </h1>
 
-          {/* Figma Floating Toolbar & Reset Controls */}
           <div className="design-toolbar-container">
             <div className="floating-design-toolbar">
               {tools.map((tool) => (
@@ -587,34 +558,28 @@ const Hero = () => {
               ))}
             </div>
 
-            {/* Reset Canvas Button */}
-            <button 
-              className="reset-editor-canvas-btn" 
-              onClick={handleResetCanvas}
-              title="Reset all canvas edits to default"
-            >
-              ↺ Reset Canvas
-            </button>
+            <div className="editor-actions-row">
+              <button type="button" className="toolbar-tool-btn undo-btn" onClick={handleUndo} title="Undo last change" aria-label="Undo last change">
+                ↶
+              </button>
+              <button className="reset-editor-canvas-btn" onClick={handleResetCanvas} title="Reset all canvas edits to default">
+                ↺ Reset Canvas
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Right Column */}
         <div className="hero-right-editorial">
-          {/* Empathy pointer handwritten note */}
-          <div 
-            className={`empathy-note-container draggable-editor-element ${activeTool === 'rotate' ? 'rotatable' : ''}`}
-            onMouseDown={(e) => startDrag(e, 'empathyNote')}
+          <div
+            className="empathy-note-container draggable-editor-element"
+            onMouseDown={(event) => startDrag(event, 'empathyNote')}
             style={{
               transform: `translate(${offsets.empathyNote.x}px, ${offsets.empathyNote.y}px) rotate(${rotations.empathyNote}deg)`,
-              cursor: activeTool === 'cursor' ? 'grab' : activeTool === 'rotate' ? 'pointer' : 'default'
+              cursor: activeTool === 'cursor' ? 'grab' : 'default',
             }}
           >
             <p className="empathy-note-text">
-              <span 
-                contentEditable={activeTool === 'text'}
-                suppressContentEditableWarning
-                className="inline-editor-text"
-              >
+              <span contentEditable={activeTool === 'text'} suppressContentEditableWarning className="inline-editor-text">
                 designing with empathy and clarity
               </span>
             </p>
@@ -626,21 +591,15 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Transparent Avatar */}
-          <div 
-            className={`illustration-wrapper-editorial draggable-editor-element ${activeTool === 'rotate' ? 'rotatable' : ''}`}
-            onMouseDown={(e) => startDrag(e, 'illustration')}
+          <div
+            className="illustration-wrapper-editorial draggable-editor-element"
+            onMouseDown={(event) => startDrag(event, 'illustration')}
             style={{
               transform: `translate(${offsets.illustration.x}px, ${offsets.illustration.y}px) rotate(${rotations.illustration}deg)`,
-              cursor: activeTool === 'cursor' ? 'grab' : activeTool === 'rotate' ? 'pointer' : 'default'
+              cursor: activeTool === 'cursor' ? 'grab' : 'default',
             }}
           >
-            <img 
-              src={suhaniImg} 
-              alt="Suhani Mathur Illustration" 
-              className="hero-illustration-image"
-              draggable="false"
-            />
+            <img src={suhaniImg} alt="Suhani Mathur Illustration" className="hero-illustration-image" draggable="false" />
           </div>
         </div>
       </div>
